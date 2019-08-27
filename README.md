@@ -1,7 +1,7 @@
-TypeScript React "Ag Grid" Table Demo
-===================================
+TypeScript React "Ag Grid" Detect Table Data Change Demo
+========================================================
 
-How to add/remove rows.
+`onCellValueChanged`
 
 ```
 npm install

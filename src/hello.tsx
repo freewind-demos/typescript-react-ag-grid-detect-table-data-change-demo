@@ -1,19 +1,9 @@
 import React, {useState} from 'react';
 import {AgGridReact} from 'ag-grid-react';
-import {GridApi, ColDef, ICellRendererParams} from 'ag-grid-community';
+import {GridApi, ColDef} from 'ag-grid-community';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
-
-function DeleteRowButton(props: ICellRendererParams) {
-  const {api, node} = props;
-
-  function deleteRow() {
-    api.updateRowData({remove: [node.data]})
-  }
-
-  return <button onClick={deleteRow}>X</button>
-}
 
 const columnDefs: ColDef[] = [{
   headerName: "Make", field: "make", sortable: true, filter: true, editable: true, width: 100
@@ -21,8 +11,6 @@ const columnDefs: ColDef[] = [{
   headerName: "Model", field: "model", sortable: true, filter: true, editable: true, width: 100
 }, {
   headerName: "Price", field: "price", sortable: true, filter: true, editable: true, width: 100
-}, {
-  headerName: "Operation", field: "operation", cellRendererFramework: DeleteRowButton
 }]
 
 type Data = {
@@ -40,36 +28,15 @@ const rowData: Data[] = [{
   }]
 ;
 
-function newData(): Data {
-  return {
-    make: "NewMake", model: "NewModel", price: 999
-  }
-}
-
 export default function Hello() {
   const [gridApi, setGridApi] = useState<GridApi>(null as any)
 
-  function addNewRow() {
-    gridApi.updateRowData({add: [newData()]});
-  }
-
-  function addNewRowAndEdit() {
-    const result = gridApi.updateRowData({add: [newData()]});
-    const addedNode = result.add[0]
-    gridApi.setFocusedCell(addedNode.rowIndex, 'make');
-    gridApi.startEditingCell({
-      rowIndex: addedNode.rowIndex,
-      colKey: 'make',
-    });
-  }
-
-  function clearAll() {
-    gridApi.setRowData([]);
-  }
-
-  function removeSelected() {
-    const selectedRows = gridApi.getSelectedRows();
-    gridApi.updateRowData({remove: selectedRows});
+  function onCellValueChanged() {
+    const allRowData: Data[] = [];
+    gridApi.getModel().forEachNode(node => {
+      allRowData.push(node.data);
+    })
+    console.log('### allRowData', allRowData);
   }
 
   return <div>
@@ -81,17 +48,13 @@ export default function Hello() {
         width: '600px'
       }}
     >
-      <div>
-        <button onClick={addNewRow}>Add</button>
-        <button onClick={addNewRowAndEdit}>Add & Edit</button>
-        <button onClick={clearAll}>Clear All</button>
-        <button onClick={removeSelected}>Remove Selected</button>
-      </div>
       <AgGridReact
         columnDefs={columnDefs}
         rowSelection='multiple'
         rowData={rowData}
-        onGridReady={params => setGridApi(params.api)}>
+        onGridReady={params => setGridApi(params.api)}
+        onCellValueChanged={onCellValueChanged}
+      >
       </AgGridReact>
     </div>
   </div>
